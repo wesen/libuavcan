@@ -224,7 +224,7 @@ class SocketCanIface : public uavcan::ICanIface
             cmsghdr cm;
             std::uint8_t data[sizeof(::timeval)];
         };
-        auto control = Control();
+        Control control;
 
         auto msg = ::msghdr();
         msg.msg_iov    = &iov;
