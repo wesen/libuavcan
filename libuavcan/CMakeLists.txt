@@ -51,6 +51,8 @@ add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/libuavcan_dsdlc_run.stamp
 add_custom_target(libuavcan_dsdlc DEPENDS ${CMAKE_BINARY_DIR}/libuavcan_dsdlc_run.stamp)
 include_directories(${DSDLC_OUTPUT})
 
+file(GLOB_RECURSE DSDLC_OUTPUT_FILES ${DSDLC_OUTPUT}/*.hpp)
+
 #
 # Compiler flags
 #
@@ -66,7 +68,7 @@ if (COMPILER_IS_GCC_COMPATIBLE)
 endif ()
 
 if (DEBUG_BUILD)
-    add_definitions(-DUAVCAN_DEBUG=1)
+#    add_definitions(-DUAVCAN_DEBUG=1)
 endif ()
 
 include_directories(include)
@@ -76,7 +78,7 @@ include_directories(include)
 #
 file(GLOB_RECURSE LIBUAVCAN_CXX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
 file(GLOB_RECURSE LIBUAVCAN_HXX_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "include/*.hpp")
-add_library(uavcan STATIC ${LIBUAVCAN_CXX_FILES} ${LIBUAVCAN_HXX_FILES})
+add_library(uavcan STATIC ${LIBUAVCAN_CXX_FILES} ${LIBUAVCAN_HXX_FILES} ${DSDLC_OUTPUT_FILES})
 target_include_directories(uavcan PUBLIC include/dsdlc_generated)
 add_dependencies(uavcan libuavcan_dsdlc)
 

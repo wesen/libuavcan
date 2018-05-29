@@ -23,6 +23,15 @@ install(DIRECTORY scripts/
 #
 find_package(Threads REQUIRED)
 
+set(UAVCAN_LINUX_INCLUDES
+    include/uavcan_linux/clock.hpp
+    include/uavcan_linux/exception.hpp
+    include/uavcan_linux/helpers.hpp
+    include/uavcan_linux/socketcan.hpp
+    include/uavcan_linux/system_utils.hpp
+    include/uavcan_linux/uavcan_linux.hpp
+    )
+
 #
 # Finding libuavcan - it will be a target if we're running from the top-level CMakeLists.txt,
 # otherwise try to find it in the system directories.
@@ -53,7 +62,7 @@ endif()
 # Tests
 # These aren't installed, an average library user should not care about them.
 #
-add_executable(test_clock apps/test_clock.cpp)
+add_executable(test_clock apps/test_clock.cpp ${UAVCAN_LINUX_INCLUDES})
 target_link_libraries(test_clock ${UAVCAN_LIB} rt ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(test_socket apps/test_socket.cpp)
