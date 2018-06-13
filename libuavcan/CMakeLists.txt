@@ -21,7 +21,8 @@ endif ()
 
 project(libuavcan)
 
-find_program(PYTHON python3)
+find_program(PYTHON python3
+    PATH_SUFFIXES python3-native)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(COMPILER_IS_GCC_COMPATIBLE 1)
