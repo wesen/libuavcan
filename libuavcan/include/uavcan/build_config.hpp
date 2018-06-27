@@ -30,7 +30,8 @@
 
 #ifndef UAVCAN_CPP_VERSION
 # if __cplusplus > 201200
-#  error Unsupported C++ standard. You can explicitly set UAVCAN_CPP_VERSION=UAVCAN_CPP11 to silence this error.
+//#  error Unsupported C++ standard. You can explicitly set UAVCAN_CPP_VERSION=UAVCAN_CPP11 to silence this error.
+#  define UAVCAN_CPP_VERSION    UAVCAN_CPP11
 # elif (__cplusplus > 201100) || defined(__GXX_EXPERIMENTAL_CXX0X__)
 #  define UAVCAN_CPP_VERSION    UAVCAN_CPP11
 # else
