@@ -269,10 +269,26 @@ class SocketCanIface : public uavcan::ICanIface
         return 1;
     }
 
+    unsigned int max_rx_queue_size = 0;
+    unsigned int max_tx_queue_size = 0;
+
+    double last_tx_time_ms = 0;
+    int tx_count = 0;
+    double last_rx_time_ms = 0;
+    int rx_count = 0;
+
+
     void pollWrite()
     {
+        struct timeval start;
+        gettimeofday(&start, NULL);
+
         while (hasReadyTx())
         {
+            if (tx_queue_.size() > max_tx_queue_size) {
+                max_tx_queue_size = tx_queue_.size();
+                fprintf(stderr, "MAX TX QUEUE SIZE: %d\n", max_tx_queue_size);
+            }
             const TxItem tx = tx_queue_.top();
 
             if (tx.deadline >= clock_.getMonotonic())
@@ -302,11 +318,26 @@ class SocketCanIface : public uavcan::ICanIface
 
             // Removing the frame from the queue even if transmission failed
             tx_queue_.pop();
+            tx_count++;
+        }
+
+        double time_tx_ms = start.tv_sec * 1000. + start.tv_usec / 1000.;
+        if ((time_tx_ms - last_tx_time_ms) > 1000.) {
+            double duration_s = (time_tx_ms - last_tx_time_ms) / 1000.;
+            last_tx_time_ms = time_tx_ms;
+            fprintf(stderr, "tx bw: %f\n", (double)(tx_count) / duration_s);
+            tx_count = 0;
         }
     }
 
     void pollRead()
     {
+        fprintf(stderr, "Poll Read Start\n");
+        struct timeval start;
+        gettimeofday(&start, NULL);
+
+        int _rxCount = 0;
+
         while (true)
         {
             RxItem rx;
@@ -327,6 +358,10 @@ class SocketCanIface : public uavcan::ICanIface
                 {
                     rx.ts_utc += clock_.getPrivateAdjustment();
                     rx_queue_.push(rx);
+                    if (rx_queue_.size() > max_rx_queue_size) {
+                        max_rx_queue_size = rx_queue_.size();
+                        fprintf(stderr, "MAX RX QUEUE SIZE: %d\n", max_rx_queue_size);
+                    }
                 }
             }
             else if (res == 0)
@@ -338,7 +373,18 @@ class SocketCanIface : public uavcan::ICanIface
                 registerError(SocketCanError::SocketReadFailure);
                 break;
             }
+            rx_count++;
+            _rxCount++;
         }
+
+        double time_rx_ms = start.tv_sec * 1000. + start.tv_usec / 1000.;
+        if ((time_rx_ms - last_rx_time_ms) > 1000.) {
+            double duration_s = (time_rx_ms - last_rx_time_ms) / 1000.;
+            last_rx_time_ms = time_rx_ms;
+            fprintf(stderr, "rx bw: %f\n", (double)(rx_count) / duration_s);
+            rx_count = 0;
+        }
+        fprintf(stderr, "Poll Read End: %d frames\n", _rxCount);
     }
 
     /**
